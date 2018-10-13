@@ -16,7 +16,7 @@ type SearchView struct {
 
 func (sv *SearchView) render() error {
 	maxX, _ := sv.State.Gui.Size()
-	if v, err := sv.State.Gui.SetView(searchView, 0, 3, maxX-1, 5); err != nil {
+	if v, err := sv.State.Gui.SetView(searchView, 15, 0, maxX-1, 2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}

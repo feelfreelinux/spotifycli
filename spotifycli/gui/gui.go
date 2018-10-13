@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"log"
 	"time"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
@@ -10,17 +9,23 @@ import (
 )
 
 const (
-	searchView   = "search"
-	playbackView = "playback"
+	searchView    = "search"
+	playbackView  = "playback"
+	playlistsView = "playlists"
+	controlsView  = "controls"
+	resultsView   = "results"
 )
 
 /*
 MainView holds reference for all views and renders them
 */
 type MainView struct {
-	search   *SearchView
-	playback *PlaybackView
-	State    *core.State
+	search    *SearchView
+	playback  *PlaybackView
+	playlists *PlaylistsView
+	controls  *ControlsView
+	results   *ResultsView
+	State     *core.State
 }
 
 func (mv *MainView) layout(g *gocui.Gui) error {
@@ -28,9 +33,23 @@ func (mv *MainView) layout(g *gocui.Gui) error {
 		return err
 	}
 
+	if err := mv.controls.render(); err != nil {
+		return err
+	}
+
+	if err := mv.playlists.render(); err != nil {
+		return err
+	}
+
+	if err := mv.results.render(); err != nil {
+		return err
+	}
+
 	if err := mv.playback.render(); err != nil {
 		return err
 	}
+
+	g.SetCurrentView(searchView)
 
 	return nil
 }
@@ -46,7 +65,16 @@ func CreateMainView(ui *gocui.Gui, client *spotify.Client) error {
 	}
 	var mainView = &MainView{
 		State: state,
+		results: &ResultsView{
+			State: state,
+		},
 		search: &SearchView{
+			State: state,
+		},
+		controls: &ControlsView{
+			State: state,
+		},
+		playlists: &PlaylistsView{
 			State: state,
 		},
 		playback: &PlaybackView{
@@ -70,7 +98,6 @@ func (mv *MainView) setHandlers() error {
 				go func() {
 					currentlyPlaying, err := mv.State.Client.PlayerCurrentlyPlaying()
 					if err != nil {
-						log.Panic(err)
 						return
 					}
 					mv.playback.drawPlaybackState(currentlyPlaying)
@@ -106,7 +133,10 @@ func (mv *MainView) quit(g *gocui.Gui, v *gocui.View) error {
 
 func changeScreenFocus(g *gocui.Gui, v *gocui.View) error {
 	switch g.CurrentView().Name() {
-
+	case playbackView:
+		{
+			g.SetCurrentView(searchView)
+		}
 	}
 	return nil
 }

@@ -9,10 +9,6 @@ import (
 	"github.com/zmb3/spotify"
 )
 
-const (
-	usernameRegex = "@([^\\s]+)"
-)
-
 /*
 InputView shows message input
 */
@@ -22,7 +18,7 @@ type PlaybackView struct {
 
 func (pv *PlaybackView) render() error {
 	maxX, maxY := pv.State.Gui.Size()
-	if v, err := pv.State.Gui.SetView(playbackView, 0, maxY-3, maxX-1, maxY-1); err != nil {
+	if v, err := pv.State.Gui.SetView(playbackView, 15, maxY-3, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -50,7 +46,7 @@ func (cv *PlaybackView) drawPlaybackState(state *spotify.CurrentlyPlaying) error
 		v.Clear()
 
 		v.Title = " " + state.Item.Artists[0].Name + ": " + state.Item.Name + " "
-		rep := int(float64(float64(state.Progress)/float64(state.Item.Duration)) * float64(maxX-1))
+		rep := int(float64(float64(state.Progress)/float64(state.Item.Duration)) * float64(maxX-18))
 		fmt.Fprint(v, strings.Repeat("▒", rep))
 		return nil
 	})
