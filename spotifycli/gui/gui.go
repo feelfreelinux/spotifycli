@@ -49,8 +49,6 @@ func (mv *MainView) layout(g *gocui.Gui) error {
 		return err
 	}
 
-	g.SetCurrentView(searchView)
-
 	return nil
 }
 
@@ -60,11 +58,13 @@ CreateMainView creates MainView and all of its child views
 func CreateMainView(ui *gocui.Gui, client *spotify.Client) error {
 	ui.Cursor = true
 	var state = &core.State{
-		Gui:    ui,
-		Client: client,
+		Gui:               ui,
+		Client:            client,
+		SearchResultsChan: make(chan *spotify.SearchResult),
 	}
 	var mainView = &MainView{
 		State: state,
+
 		results: &ResultsView{
 			State: state,
 		},
@@ -81,6 +81,7 @@ func CreateMainView(ui *gocui.Gui, client *spotify.Client) error {
 			State: state,
 		},
 	}
+
 	ui.SetManagerFunc(mainView.layout)
 	err := mainView.bindKeys()
 
@@ -105,6 +106,13 @@ func (mv *MainView) setHandlers() error {
 			}
 		}
 	}()
+
+	go func() {
+		for {
+			search := <-mv.State.SearchResultsChan
+			mv.results.showResults(search)
+		}
+	}()
 	return nil
 }
 
@@ -121,6 +129,10 @@ func (mv *MainView) bindKeys() error {
 		return err
 	}
 
+	if err := mv.results.bindKeys(); err != nil {
+		return err
+	}
+
 	if err := mv.search.bindKeys(); err != nil {
 		return err
 	}
@@ -133,10 +145,14 @@ func (mv *MainView) quit(g *gocui.Gui, v *gocui.View) error {
 
 func changeScreenFocus(g *gocui.Gui, v *gocui.View) error {
 	switch g.CurrentView().Name() {
-	case playbackView:
-		{
-			g.SetCurrentView(searchView)
-		}
+	case searchView:
+		g.SetCurrentView(resultsView)
+
+	case resultsView:
+		g.SetCurrentView(playlistsView)
+
+	case playlistsView:
+		g.SetCurrentView(searchView)
 	}
 	return nil
 }

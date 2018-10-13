@@ -9,6 +9,7 @@ import (
 State holds reference of current application state (selected channel, etc)
 */
 type State struct {
-	Gui    *gocui.Gui
-	Client *spotify.Client
+	Gui               *gocui.Gui
+	Client            *spotify.Client
+	SearchResultsChan chan *spotify.SearchResult
 }

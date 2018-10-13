@@ -28,9 +28,6 @@ func (pv *PlaybackView) render() error {
 		v.SelFgColor = gocui.ColorBlack
 		v.Title = " playback "
 		v.Wrap = true
-		if _, err := pv.State.Gui.SetCurrentView(playbackView); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -47,6 +44,7 @@ func (cv *PlaybackView) drawPlaybackState(state *spotify.CurrentlyPlaying) error
 
 		v.Title = " " + state.Item.Artists[0].Name + ": " + state.Item.Name + " "
 		rep := int(float64(float64(state.Progress)/float64(state.Item.Duration)) * float64(maxX-18))
+
 		fmt.Fprint(v, strings.Repeat("▒", rep))
 		return nil
 	})
