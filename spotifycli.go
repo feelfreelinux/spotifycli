@@ -15,10 +15,10 @@ import (
 )
 
 type config struct {
-	Token       string `json:"clientId"`
-	Secret      string `json:"secretKey"`
-	AccessToken string `json:"oauthToken"`
-	TokenType   string `json:"tokenType"`
+	Token        string `json:"clientId"`
+	Secret       string `json:"secretKey"`
+	RefreshToken string `json:"refreshToken"`
+	TokenType    string `json:"tokenType"`
 }
 
 func loadConfig() (cfg config, err error) {
@@ -33,7 +33,7 @@ func loadConfig() (cfg config, err error) {
 		fmt.Print("SecretId: ")
 		fmt.Scanln(&cfg.Secret)
 		cfg.TokenType = ""
-		cfg.AccessToken = ""
+		cfg.RefreshToken = ""
 		var jsonFile *os.File
 		jsonFile, err = dir.QueryFolders(configdir.Global)[0].Create("config.json")
 		if err != nil {
@@ -75,7 +75,7 @@ func main() {
 
 	auth.SetAuthInfo(cfg.Token, cfg.Secret)
 
-	if cfg.AccessToken == "" {
+	if cfg.RefreshToken == "" {
 		// We'll want these variables sooner rather than later
 		var client *spotify.Client
 
@@ -94,8 +94,8 @@ func main() {
 		http.ListenAndServe(":8080", nil)
 	} else {
 		token := &oauth2.Token{
-			TokenType:   cfg.TokenType,
-			AccessToken: cfg.AccessToken,
+			TokenType:    cfg.TokenType,
+			RefreshToken: cfg.RefreshToken,
 		}
 		client := auth.NewClient(token)
 		openGui(&client)
@@ -120,7 +120,7 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg.AccessToken = tok.AccessToken
+	cfg.RefreshToken = tok.RefreshToken
 	cfg.TokenType = tok.TokenType
 
 	var jsonFile *os.File

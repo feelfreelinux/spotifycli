@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"log"
 	"time"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
@@ -69,6 +70,7 @@ func (mv *MainView) setHandlers() error {
 				go func() {
 					currentlyPlaying, err := mv.State.Client.PlayerCurrentlyPlaying()
 					if err != nil {
+						log.Panic(err)
 						return
 					}
 					mv.playback.drawPlaybackState(currentlyPlaying)
