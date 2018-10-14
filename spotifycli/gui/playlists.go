@@ -1,8 +1,11 @@
 package gui
 
 import (
+	"fmt"
+
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
 	"github.com/jroimartin/gocui"
+	"github.com/zmb3/spotify"
 )
 
 /*
@@ -23,30 +26,26 @@ func (pv *PlaylistsView) render() error {
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack
 		v.Title = " playlists "
-		v.Wrap = true
 	}
 	return nil
 }
 
-/* func (pv *PlaylistsView) showPlaylists(state *spotify.GetPlaylists) error {
+func (pv *PlaylistsView) showPlaylists(playlists *spotify.SimplePlaylistPage) error {
 	pv.State.Gui.Update(func(g *gocui.Gui) error {
-		fmt.Printf("ddd")
-		maxX, _ := pv.State.Gui.Size()
-		v, err := g.View(PlaylistsView)
+		v, err := g.View(playlistsView)
 		if err != nil {
 			return err
 		}
 		v.Clear()
 
-		var spotfiy map[string]interface{}
-
-		func (spotify[playlists].(map[string]interface{})) {
-			fmt.Printf(playlists[name])
+		for _, playlist := range playlists.Playlists {
+			fmt.Fprintln(v, playlist.Name)
 		}
 
 		return nil
 	})
-} */
+	return nil
+}
 
 func (cv *PlaylistsView) bindKeys() error {
 	return nil

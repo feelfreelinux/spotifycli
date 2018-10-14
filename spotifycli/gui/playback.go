@@ -42,7 +42,7 @@ func (cv *PlaybackView) drawPlaybackState(state *spotify.CurrentlyPlaying) error
 		}
 		v.Clear()
 
-		v.Title = " " + state.Item.Artists[0].Name + ": " + state.Item.Name + " "
+		v.Title = " " + state.Item.Artists[0].Name + " - " + state.Item.Name + " "
 		rep := int(float64(float64(state.Progress)/float64(state.Item.Duration)) * float64(maxX-18))
 
 		fmt.Fprint(v, strings.Repeat("▒", rep))

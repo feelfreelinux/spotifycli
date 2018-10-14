@@ -113,6 +113,15 @@ func (mv *MainView) setHandlers() error {
 			mv.results.showResults(search)
 		}
 	}()
+
+	go func() {
+		results, err := mv.State.Client.CurrentUsersPlaylists()
+		if err != nil {
+			return
+		}
+
+		mv.playlists.showPlaylists(results)
+	}()
 	return nil
 }
 
