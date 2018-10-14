@@ -2,7 +2,9 @@ package gui
 
 import (
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
+	"github.com/gdamore/tcell"
 	"github.com/jroimartin/gocui"
+	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
 
@@ -13,25 +15,16 @@ InputView shows message input
 */
 type SearchView struct {
 	State *core.State
+	list  *tview.InputField
 }
 
-func (sv *SearchView) render() error {
-	maxX, _ := sv.State.Gui.Size()
-	if v, err := sv.State.Gui.SetView(searchView, 15, 0, maxX-1, 2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Editable = true
-		v.Wrap = false
-		v.SelBgColor = gocui.ColorGreen
-		v.SelFgColor = gocui.ColorBlack
-		v.Title = " search "
-		v.Wrap = true
-		if _, err := sv.State.Gui.SetCurrentView(searchView); err != nil {
-			return err
-		}
-	}
-	return nil
+func (sv *SearchView) render() tview.Primitive {
+	sv.list = tview.NewInputField()
+	sv.list.SetBorder(true)
+	sv.list.SetFieldBackgroundColor(tcell.ColorDefault)
+	sv.list.SetTitle("search")
+	sv.list.SetBackgroundColor(tcell.ColorDefault)
+	return sv.list
 }
 
 func (sv *SearchView) search(g *gocui.Gui, v *gocui.View) error {

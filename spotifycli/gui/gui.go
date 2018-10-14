@@ -5,6 +5,7 @@ import (
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
 	"github.com/jroimartin/gocui"
+	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
 
@@ -28,37 +29,28 @@ type MainView struct {
 	State     *core.State
 }
 
-func (mv *MainView) layout(g *gocui.Gui) error {
-	if err := mv.search.render(); err != nil {
-		return err
-	}
+func (mv *MainView) drawLayout() *tview.Flex {
+	flex := tview.NewFlex()
+	flex.AddItem(mv.playlists.render(), 0, 1, false)
 
-	if err := mv.controls.render(); err != nil {
-		return err
-	}
+	flex.AddItem(
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(mv.search.render(), 3, 1, true).
+			AddItem(mv.results.render(), 0, 6, false), 0, 4, true)
 
-	if err := mv.playlists.render(); err != nil {
-		return err
-	}
-
-	if err := mv.results.render(); err != nil {
-		return err
-	}
-
-	if err := mv.playback.render(); err != nil {
-		return err
-	}
-
-	return nil
+	return tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(flex, 0, 8, true).
+		AddItem(mv.playback.render(), 3, 0, false)
 }
 
 /*
 CreateMainView creates MainView and all of its child views
 */
-func CreateMainView(ui *gocui.Gui, client *spotify.Client) error {
-	ui.Cursor = true
+func CreateMainView(ui *tview.Application, client *spotify.Client) error {
 	var state = &core.State{
-		Gui:               ui,
+		App:               ui,
 		Client:            client,
 		SearchResultsChan: make(chan *spotify.SearchResult),
 	}
@@ -82,11 +74,10 @@ func CreateMainView(ui *gocui.Gui, client *spotify.Client) error {
 		},
 	}
 
-	ui.SetManagerFunc(mainView.layout)
-	err := mainView.bindKeys()
-
 	mainView.setHandlers()
-	return err
+
+	ui.SetRoot(mainView.drawLayout(), true)
+	return nil
 }
 
 func (mv *MainView) setHandlers() error {
@@ -107,12 +98,12 @@ func (mv *MainView) setHandlers() error {
 		}
 	}()
 
-	go func() {
+	/*go func() {
 		for {
 			search := <-mv.State.SearchResultsChan
 			mv.results.showResults(search)
 		}
-	}()
+	}()*/
 
 	go func() {
 		results, err := mv.State.Client.CurrentUsersPlaylists()

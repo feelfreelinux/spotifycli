@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/gui"
-	"github.com/jroimartin/gocui"
+	"github.com/rivo/tview"
 	"github.com/shibukawa/configdir"
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2"
@@ -144,18 +144,14 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func openGui(client *spotify.Client) {
-	g, err := gocui.NewGui(gocui.Output256)
-	if err != nil {
-		log.Panicln(err)
-	}
-	defer g.Close()
+	g := tview.NewApplication()
 
-	err = gui.CreateMainView(g, client)
+	err := gui.CreateMainView(g, client)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
+	if err := g.Run(); err != nil {
 		log.Panicln(err)
 	}
 }

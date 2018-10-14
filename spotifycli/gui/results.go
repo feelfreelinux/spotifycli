@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
+	"github.com/gdamore/tcell"
 	"github.com/jroimartin/gocui"
+	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
 
@@ -14,23 +16,15 @@ InputView shows message input
 type ResultsView struct {
 	State   *core.State
 	results *spotify.SearchResult
+	list    *tview.TextView
 }
 
-func (rv *ResultsView) render() error {
-	maxX, maxY := rv.State.Gui.Size()
-	if v, err := rv.State.Gui.SetView(resultsView, 15, 3, maxX-1, maxY-4); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Editable = false
-		v.Wrap = false
-		v.Highlight = true
-		v.SelBgColor = gocui.ColorGreen
-		v.SelFgColor = gocui.ColorBlack
-		v.Title = " results (songs) "
-		v.Wrap = true
-	}
-	return nil
+func (rv *ResultsView) render() tview.Primitive {
+	rv.list = tview.NewTextView()
+	rv.list.SetBorder(true)
+	rv.list.SetTitle("results")
+	rv.list.SetBackgroundColor(tcell.ColorDefault)
+	return rv.list
 }
 
 func (rv *ResultsView) showResults(result *spotify.SearchResult) error {
