@@ -28,6 +28,26 @@ func (pv *PlaylistsView) render() error {
 	return nil
 }
 
+/* func (pv *PlaylistsView) showPlaylists(state *spotify.GetPlaylists) error {
+	pv.State.Gui.Update(func(g *gocui.Gui) error {
+		fmt.Printf("ddd")
+		maxX, _ := pv.State.Gui.Size()
+		v, err := g.View(PlaylistsView)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		var spotfiy map[string]interface{}
+
+		func (spotify[playlists].(map[string]interface{})) {
+			fmt.Printf(playlists[name])
+		}
+
+		return nil
+	})
+} */
+
 func (cv *PlaylistsView) bindKeys() error {
 	return nil
 }
