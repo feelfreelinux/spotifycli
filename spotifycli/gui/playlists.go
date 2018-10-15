@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
-	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
@@ -23,7 +22,7 @@ func (pv *PlaylistsView) render() tview.Primitive {
 	pv.list.SetTitleAlign(tview.AlignCenter)
 	pv.list.SetBorder(true)
 	pv.list.SetScrollable(true)
-	pv.list.SetBackgroundColor(tcell.ColorDefault)
+	// pv.list.SetBackgroundColor(tcell.ColorDefault)
 	return pv.list
 }
 

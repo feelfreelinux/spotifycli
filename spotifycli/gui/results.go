@@ -1,11 +1,7 @@
 package gui
 
 import (
-	"fmt"
-
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
-	"github.com/gdamore/tcell"
-	"github.com/jroimartin/gocui"
 	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
@@ -16,83 +12,52 @@ InputView shows message input
 type ResultsView struct {
 	State   *core.State
 	results *spotify.SearchResult
-	list    *tview.TextView
+	list    *tview.Table
 }
 
 func (rv *ResultsView) render() tview.Primitive {
-	rv.list = tview.NewTextView()
+	rv.list = tview.NewTable()
+	rv.list.SetFixed(0, 0)
+	rv.list.SetSeparator(tview.Borders.Vertical)
 	rv.list.SetBorder(true)
+	rv.list.SetSelectable(true, false)
 	rv.list.SetTitle("results")
-	rv.list.SetBackgroundColor(tcell.ColorDefault)
+	// rv.list.SetBackgroundColor(tcell.ColorDarkSlateGray)
+	rv.list.SetSelectedFunc(rv.playSong)
 	return rv.list
 }
 
-func (rv *ResultsView) showResults(result *spotify.SearchResult) error {
+func (rv *ResultsView) showResults(result *spotify.SearchResult) {
 	rv.results = result
-	rv.State.Gui.Update(func(g *gocui.Gui) error {
-		v, err := g.View(resultsView)
-		if err != nil {
-			return err
-		}
-		v.Clear()
+	rv.list.Clear()
+	rv.list.SetCell(0, 2, tview.NewTableCell("[yellow]artist").SetSelectable(false))
+	rv.list.SetCell(0, 0, tview.NewTableCell("[yellow]song").SetExpansion(3).SetSelectable(false))
+	rv.list.SetCell(0, 1, tview.NewTableCell("[yellow]album").SetSelectable(false))
+	for row, track := range result.Tracks.Tracks {
+		artistCell := tview.NewTableCell(track.Artists[0].Name)
+		songCell := tview.NewTableCell(track.Name)
+		albumCell := tview.NewTableCell(track.Album.Name)
 
-		for _, track := range result.Tracks.Tracks {
-			fmt.Fprintln(v, "♪ "+track.Artists[0].Name+" • "+track.Album.Name+" • "+track.Name)
-		}
-		return nil
+		songCell.SetExpansion(3)
+
+		rv.list.SetCell(row+1, 2, artistCell)
+		rv.list.SetCell(row+1, 0, songCell)
+		rv.list.SetCell(row+1, 1, albumCell)
+	}
+	rv.list.ScrollToBeginning()
+
+	rv.State.App.Draw()
+}
+
+func (rv *ResultsView) playSong(index int, _ int) {
+	uris := make([]spotify.URI, 1)
+	uris[0] = rv.results.Tracks.Tracks[index-1].URI
+	rv.State.Client.PlayOpt(&spotify.PlayOptions{
+		URIs: uris,
 	})
-	return nil
-}
 
-func cursorDown(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy+1); err != nil {
-			ox, oy := v.Origin()
-			if err := v.SetOrigin(ox, oy+1); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func cursorUp(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-1); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (rv *ResultsView) playSong(g *gocui.Gui, v *gocui.View) error {
-	_, cy := v.Cursor()
-	_, xy := v.Origin()
-	pos := cy + xy
-	if pos < len(rv.results.Tracks.Tracks) {
-		uris := make([]spotify.URI, 1)
-		uris[0] = rv.results.Tracks.Tracks[pos].URI
-		rv.State.Client.PlayOpt(&spotify.PlayOptions{
-			URIs: uris,
-		})
-	}
-	return nil
 }
 
 func (rv *ResultsView) bindKeys() error {
-	if err := rv.State.Gui.SetKeybinding(resultsView, gocui.KeyArrowDown, gocui.ModNone, cursorDown); err != nil {
-		return err
-	}
-	if err := rv.State.Gui.SetKeybinding(resultsView, gocui.KeyArrowUp, gocui.ModNone, cursorUp); err != nil {
-		return err
-	}
-	if err := rv.State.Gui.SetKeybinding(resultsView, gocui.KeyEnter, gocui.ModNone, rv.playSong); err != nil {
-		return err
-	}
 	return nil
 }

@@ -3,7 +3,6 @@ package gui
 import (
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
 	"github.com/gdamore/tcell"
-	"github.com/jroimartin/gocui"
 	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
 )
@@ -23,36 +22,20 @@ func (sv *SearchView) render() tview.Primitive {
 	sv.list.SetBorder(true)
 	sv.list.SetFieldBackgroundColor(tcell.ColorDefault)
 	sv.list.SetTitle("search")
-	sv.list.SetBackgroundColor(tcell.ColorDefault)
+	// sv.list.SetBackgroundColor(tcell.ColorDefault)
+	sv.list.SetDoneFunc(func(key tcell.Key) {
+		go func() {
+			result, err := sv.State.Client.Search(sv.list.GetText(), spotify.SearchTypeTrack)
+			if err != nil {
+				return
+			}
+
+			sv.State.SearchResultsChan <- result
+		}()
+	})
 	return sv.list
 }
 
-func (sv *SearchView) search(g *gocui.Gui, v *gocui.View) error {
-	v, err := g.View(searchView)
-	if err != nil {
-		return err
-	}
-
-	msg := v.Buffer()
-	v.Clear()
-	v.SetCursor(0, 0)
-	v.SetOrigin(0, 0)
-
-	go func() {
-		result, err := sv.State.Client.Search(msg, spotify.SearchTypeTrack)
-		if err != nil {
-			return
-		}
-
-		sv.State.SearchResultsChan <- result
-	}()
-
-	return nil
-}
-
 func (sv *SearchView) bindKeys() error {
-	if err := sv.State.Gui.SetKeybinding(searchView, gocui.KeyEnter, gocui.ModNone, sv.search); err != nil {
-		return err
-	}
 	return nil
 }

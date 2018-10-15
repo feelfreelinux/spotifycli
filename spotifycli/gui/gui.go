@@ -4,17 +4,10 @@ import (
 	"time"
 
 	"github.com/feelfreelinux/spotifycli/spotifycli/core"
+	"github.com/gdamore/tcell"
 	"github.com/jroimartin/gocui"
 	"github.com/rivo/tview"
 	"github.com/zmb3/spotify"
-)
-
-const (
-	searchView    = "search"
-	playbackView  = "playback"
-	playlistsView = "playlists"
-	controlsView  = "controls"
-	resultsView   = "results"
 )
 
 /*
@@ -24,7 +17,6 @@ type MainView struct {
 	search    *SearchView
 	playback  *PlaybackView
 	playlists *PlaylistsView
-	controls  *ControlsView
 	results   *ResultsView
 	State     *core.State
 }
@@ -63,9 +55,6 @@ func CreateMainView(ui *tview.Application, client *spotify.Client) error {
 		search: &SearchView{
 			State: state,
 		},
-		controls: &ControlsView{
-			State: state,
-		},
 		playlists: &PlaylistsView{
 			State: state,
 		},
@@ -75,6 +64,7 @@ func CreateMainView(ui *tview.Application, client *spotify.Client) error {
 	}
 
 	mainView.setHandlers()
+	mainView.bindKeys()
 
 	ui.SetRoot(mainView.drawLayout(), true)
 	return nil
@@ -98,12 +88,12 @@ func (mv *MainView) setHandlers() error {
 		}
 	}()
 
-	/*go func() {
+	go func() {
 		for {
 			search := <-mv.State.SearchResultsChan
 			mv.results.showResults(search)
 		}
-	}()*/
+	}()
 
 	go func() {
 		results, err := mv.State.Client.CurrentUsersPlaylists()
@@ -116,43 +106,17 @@ func (mv *MainView) setHandlers() error {
 	return nil
 }
 
-func (mv *MainView) bindKeys() error {
-	if err := mv.State.Gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, mv.quit); err != nil {
-		return err
-	}
+func (mv *MainView) bindKeys() {
 
-	if err := mv.State.Gui.SetKeybinding("", gocui.KeyCtrlSpace, gocui.ModNone, changeScreenFocus); err != nil {
-		return err
-	}
-
-	if err := mv.search.bindKeys(); err != nil {
-		return err
-	}
-
-	if err := mv.results.bindKeys(); err != nil {
-		return err
-	}
-
-	if err := mv.search.bindKeys(); err != nil {
-		return err
-	}
-	return nil
+	mv.State.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyCtrlSpace {
+			mv.State.App.SetFocus(mv.results.list)
+			mv.State.App.Draw()
+		}
+		return event
+	})
 }
 
 func (mv *MainView) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
-}
-
-func changeScreenFocus(g *gocui.Gui, v *gocui.View) error {
-	switch g.CurrentView().Name() {
-	case searchView:
-		g.SetCurrentView(resultsView)
-
-	case resultsView:
-		g.SetCurrentView(playlistsView)
-
-	case playlistsView:
-		g.SetCurrentView(searchView)
-	}
-	return nil
 }
