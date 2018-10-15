@@ -30,9 +30,9 @@ func (rv *ResultsView) render() tview.Primitive {
 func (rv *ResultsView) showResults(result *spotify.SearchResult) {
 	rv.results = result
 	rv.list.Clear()
-	rv.list.SetCell(0, 2, tview.NewTableCell("[yellow]artist").SetSelectable(false))
-	rv.list.SetCell(0, 0, tview.NewTableCell("[yellow]song").SetExpansion(3).SetSelectable(false))
-	rv.list.SetCell(0, 1, tview.NewTableCell("[yellow]album").SetSelectable(false))
+	rv.list.SetCell(0, 2, tview.NewTableCell("[yellow]artist").SetSelectable(false).SetAlign(tview.AlignCenter))
+	rv.list.SetCell(0, 0, tview.NewTableCell("[yellow]song").SetExpansion(3).SetSelectable(false).SetAlign(tview.AlignCenter))
+	rv.list.SetCell(0, 1, tview.NewTableCell("[yellow]album").SetSelectable(false).SetAlign(tview.AlignCenter))
 	for row, track := range result.Tracks.Tracks {
 		artistCell := tview.NewTableCell(track.Artists[0].Name)
 		songCell := tview.NewTableCell(track.Name)

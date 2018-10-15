@@ -110,8 +110,13 @@ func (mv *MainView) bindKeys() {
 
 	mv.State.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyCtrlSpace {
-			mv.State.App.SetFocus(mv.results.list)
-			mv.State.App.Draw()
+			if mv.State.App.GetFocus() == mv.search.list {
+				mv.State.App.SetFocus(mv.results.list)
+				mv.State.App.Draw()
+			} else {
+				mv.State.App.SetFocus(mv.search.list)
+				mv.State.App.Draw()
+			}
 		}
 		return event
 	})
