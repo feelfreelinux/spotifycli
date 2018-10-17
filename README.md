@@ -6,10 +6,14 @@ CLI client for [spotify](https://www.spotify.com/) written in [Golang](https://g
 
 ## Examples
 
+### Search Songs/Artist
+
+![search](https://i.imgur.com/1PjNsa0.gif)
+
 ### Choose Artist
 
-[Gif]()
+![artist](https://i.imgur.com/F5EJImi.gif)
 
-### Choose Artist
+### Choose Album
 
-[Gif]()
+![album](https://i.imgur.com/0rnaLL6.gif)
