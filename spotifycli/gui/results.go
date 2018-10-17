@@ -125,6 +125,7 @@ func (rv *ResultsView) playSong(index int, column int) {
 
 	if column == 2 {
 		rv.showArtist(&rv.results.Tracks.Tracks[index-1].Artists[0])
+		return
 	}
 
 	uris := make([]spotify.URI, 1)
@@ -137,10 +138,12 @@ func (rv *ResultsView) playSong(index int, column int) {
 func (rv *ResultsView) playAlbum(index int, column int) {
 	if column == 2 {
 		rv.showArtist(&rv.albumResults.Tracks[index-1].Artists[0])
+		return
 	}
 
 	if column == 1 {
 		rv.showAlbum(rv.currentAlbum)
+		return
 	}
 
 	uris := make([]spotify.URI, 1)
