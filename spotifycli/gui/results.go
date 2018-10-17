@@ -10,11 +10,13 @@ import (
 InputView shows message input
 */
 type ResultsView struct {
-	State        *core.State
-	results      *spotify.SearchResult
-	albumResults *spotify.SimpleTrackPage
-	currentAlbum *spotify.SimpleAlbum
-	list         *tview.Table
+	State         *core.State
+	results       *spotify.SearchResult
+	albumResults  *spotify.SimpleTrackPage
+	artistResults *spotify.SimpleAlbumPage
+	currentAlbum  *spotify.SimpleAlbum
+	currentArtist *spotify.SimpleArtist
+	list          *tview.Table
 }
 
 func (rv *ResultsView) render() tview.Primitive {
@@ -84,11 +86,47 @@ func (rv *ResultsView) showAlbum(album *spotify.SimpleAlbum) {
 
 }
 
+func (rv *ResultsView) showArtist(artist *spotify.SimpleArtist) {
+	go func() {
+		result, err := rv.State.Client.GetArtistAlbums(artist.ID)
+		if err != nil {
+			return
+		}
+		rv.currentArtist = artist
+		rv.artistResults = result
+		rv.list.SetSelectedFunc(func(index int, _ int) {
+			rv.showAlbum(&result.Albums[index-1])
+		})
+		rv.list.SetTitle(artist.Name)
+		rv.list.Clear()
+		rv.list.SetCell(0, 1, tview.NewTableCell("[yellow]artist").SetSelectable(false).SetAlign(tview.AlignCenter))
+		rv.list.SetCell(0, 0, tview.NewTableCell("[yellow]album").SetSelectable(false).SetExpansion(1).SetAlign(tview.AlignCenter))
+		for row, album := range result.Albums {
+			artistCell := tview.NewTableCell(artist.Name)
+			albumCell := tview.NewTableCell(album.Name)
+
+			albumCell.SetExpansion(1)
+
+			rv.list.SetCell(row+1, 1, artistCell)
+			rv.list.SetCell(row+1, 0, albumCell)
+		}
+		rv.list.ScrollToBeginning()
+
+		rv.State.App.Draw()
+	}()
+
+}
+
 func (rv *ResultsView) playSong(index int, column int) {
 	if column == 1 {
 		rv.showAlbum(&rv.results.Tracks.Tracks[index-1].Album)
 		return
 	}
+
+	if column == 2 {
+		rv.showArtist(&rv.results.Tracks.Tracks[index-1].Artists[0])
+	}
+
 	uris := make([]spotify.URI, 1)
 	uris[0] = rv.results.Tracks.Tracks[index-1].URI
 	rv.State.Client.PlayOpt(&spotify.PlayOptions{
@@ -96,7 +134,15 @@ func (rv *ResultsView) playSong(index int, column int) {
 	})
 }
 
-func (rv *ResultsView) playAlbum(index int, _ int) {
+func (rv *ResultsView) playAlbum(index int, column int) {
+	if column == 2 {
+		rv.showArtist(&rv.albumResults.Tracks[index-1].Artists[0])
+	}
+
+	if column == 1 {
+		rv.showAlbum(rv.currentAlbum)
+	}
+
 	uris := make([]spotify.URI, 1)
 	uris[0] = rv.albumResults.Tracks[index-1].URI
 	rv.State.Client.PlayOpt(&spotify.PlayOptions{

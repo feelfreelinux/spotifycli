@@ -109,7 +109,7 @@ func (mv *MainView) setHandlers() error {
 func (mv *MainView) bindKeys() {
 
 	mv.State.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyCtrlSpace {
+		if event.Key() == tcell.KeyTab {
 			if mv.State.App.GetFocus() == mv.search.list {
 				mv.State.App.SetFocus(mv.results.list)
 				mv.State.App.Draw()
