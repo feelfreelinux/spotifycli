@@ -124,8 +124,11 @@ func (mv *MainView) bindKeys() {
 			} else if mv.State.App.GetFocus() == mv.results.list {
 				mv.State.App.SetFocus(mv.devices.list)
 				mv.State.App.Draw()
-			} else if mv.State.App.GetFocus() == mv.devices.list {
+			} else if mv.State.App.GetFocus() == mv.playlists.list {
 				mv.State.App.SetFocus(mv.search.list)
+				mv.State.App.Draw()
+			} else if mv.State.App.GetFocus() == mv.devices.list {
+				mv.State.App.SetFocus(mv.playlists.list)
 				mv.State.App.Draw()
 			}
 		}
