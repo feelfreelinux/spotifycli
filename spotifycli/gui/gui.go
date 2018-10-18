@@ -17,13 +17,18 @@ type MainView struct {
 	search    *SearchView
 	playback  *PlaybackView
 	playlists *PlaylistsView
+	devices   *DevicesView
 	results   *ResultsView
 	State     *core.State
 }
 
 func (mv *MainView) drawLayout() *tview.Flex {
 	flex := tview.NewFlex()
-	flex.AddItem(mv.playlists.render(), 0, 1, false)
+	flex.AddItem(
+		tview.NewFlex().
+			SetDirection(tview.FlexRow).
+			AddItem(mv.playlists.render(), 0, 5, false).
+			AddItem(mv.devices.render(), 0, 2, false), 0, 1, false)
 
 	flex.AddItem(
 		tview.NewFlex().
@@ -59,6 +64,9 @@ func CreateMainView(ui *tview.Application, client *spotify.Client) error {
 			State: state,
 		},
 		playback: &PlaybackView{
+			State: state,
+		},
+		devices: &DevicesView{
 			State: state,
 		},
 	}
@@ -113,7 +121,10 @@ func (mv *MainView) bindKeys() {
 			if mv.State.App.GetFocus() == mv.search.list {
 				mv.State.App.SetFocus(mv.results.list)
 				mv.State.App.Draw()
-			} else {
+			} else if mv.State.App.GetFocus() == mv.results.list {
+				mv.State.App.SetFocus(mv.devices.list)
+				mv.State.App.Draw()
+			} else if mv.State.App.GetFocus() == mv.devices.list {
 				mv.State.App.SetFocus(mv.search.list)
 				mv.State.App.Draw()
 			}
