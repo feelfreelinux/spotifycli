@@ -4,6 +4,19 @@
 
 CLI client for [spotify](https://www.spotify.com/) written in [Golang](https://golang.org/)
 
+## How to install
+Clone this repository
+
+`git clone https://github.com/feelfreelinux/spotifycli`
+
+Install depedencies
+
+`go get`
+
+Run spotifycli
+
+`go run spotifycli.go`
+
 ## Examples
 
 ### Search Songs/Artist
